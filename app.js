@@ -202,9 +202,9 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
     const advancedModules = modules.filter(m => m.azureAppReq);
     
     return html`
-      <div class="mt-8">
-        <div class="p-4 border-2 border-green-600 rounded-lg bg-white glass-card pulse-border">
-          <h4 class="font-bold text-gray-900 mb-3">Best for IT Consultants - No Azure App Registration Required</h4>
+      <div class="mt-12">
+        <div class="p-6 border-2 border-green-600 rounded-lg bg-white glass-card pulse-border shadow-lg">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Best for IT Consultants - No Azure App Registration Required</h3>
           <p class="text-sm text-gray-700 mb-3">
             These modules work without Azure App Registration, making them ideal for IT consultants. 
             Getting Azure App registrations is often very challenging when working with clients.
@@ -304,8 +304,8 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
           </div>
         </div>
         
-        <div class="mt-6 p-4 border-2 border-amber-600 rounded-lg bg-white glass-card pulse-border">
-          <h4 class="font-bold text-gray-900 mb-3">Advanced Modules - Azure App Registration Required</h4>
+        <div class="mt-8 p-6 border-2 border-amber-600 rounded-lg bg-white glass-card pulse-border shadow-lg">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">Advanced Modules - Azure App Registration Required</h3>
           <p class="text-sm text-gray-700 mb-3">
             <strong>When to use:</strong> Best for large, long-lasting projects where PIM gets in the way and you need automation.<br/>
             <strong>Reality check:</strong> Both modules require admin involvement - Graph needs consent even for delegated auth.
@@ -450,12 +450,30 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
 
   return html`
     <div class="container mx-auto p-4 font-sans">
-      <h1 class="text-2xl font-bold mb-6 text-center">Microsoft 365 PowerShell Modules: Reference Guide for Busy IT Consultants</h1>
+      <header class="mb-12 text-center py-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 animated-title leading-tight">
+          Microsoft 365 PowerShell Modules
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Reference Guide for Busy IT Consultants
+        </p>
+        <div class="mt-6 flex justify-center gap-4 text-sm">
+          <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+            💼 Consultant-Focused
+          </span>
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">
+            ⚡ Quick Reference
+          </span>
+          <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
+            🔐 Auth Guidance
+          </span>
+        </div>
+      </header>
       
       ${getRecommendations()}
 
-      <div class="mt-8 mb-8">
-        <h2 class="text-xl font-bold mb-4">Capability Overview</h2>
+      <div class="mt-16 mb-12">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Capability Overview</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           ${modules.map((module, idx) => html`
               <div key=${idx} class=${`border rounded-lg overflow-hidden module-card glass-card shadow-sm ${module.azureAppReq ? 'border-orange-400' : 'border-gray-300'}`}>
@@ -573,7 +591,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
         </div>
       </div>
 
-      <div class="mt-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-xl shadow-lg p-6 border border-purple-200">
+      <div class="mt-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-xl shadow-lg p-8 border border-purple-200 glass-card float-animation">
         <div class="flex items-center mb-4">
           <div class="p-2 bg-purple-600 rounded-lg mr-3">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
