@@ -21,9 +21,10 @@ const ModuleComparison = () => {
       capabilityScore: 5,
       capabilities: [
         "M365 Groups",
-        "M365 Members"
+        "M365 Members",
+        "Mailboxes", "M365 Groups", "Users", "Defender for M365", "Devices", "Mail Flow"
       ],
-      specializations: ["Exchange", "Mailboxes", "Groups", "Users"],
+      specializations: ["Exchange", ,"Entra ID"],
       notes: "Primary focus on email and group management. Can retrieve M365 Group info and members with Get-UnifiedGroup and Get-UnifiedGroupLinks.",
       installCmd: `Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser
 Import-Module ExchangeOnlineManagement`,
@@ -38,9 +39,11 @@ Import-Module ExchangeOnlineManagement`,
       capabilityScore: 5,
       capabilities: [
         "M365 Groups",
-        "Teams Members",
         "M365 Members",
-        "Team Management"
+        "Team Management",
+        "Teams Apps",
+        "Teams Voice and Calling",
+        "Global Teams Tenant Policies"
       ],
       specializations: ["Teams"],
       notes: "Excellent for Teams management. Retrieves Teams-enabled M365 groups with Get-Team and team members with Get-TeamUser.",
@@ -53,9 +56,12 @@ Import-Module ExchangeOnlineManagement`,
       azureAppReq: false,
       ps5: true,
       ps7: true,
-      capabilityScore: 1,
+      capabilityScore: 5,
       capabilities: [
-        "SharePoint Sites"
+        "SharePoint Sites", "OneDrive", "Lists", "Libraries", "Pages", "Files", "Folders",
+        "Site Columns", "Content Types", "Web Parts", "Permissions", "Search", "List items", "Views",
+        "SharePoint Navigation", "Site Permissions", "File permissions", "SharePoint Groups"
+
       ],
       specializations: ["SharePoint", "SharePoint sites (low-level)", "OneDrive"],
       notes: "Without Azure app registration, limited to SharePoint operations only. Cannot access M365 Groups, Teams, or Power Platform features.",
@@ -64,19 +70,19 @@ Import-Module ExchangeOnlineManagement`,
       cmdletUrl: "https://pnp.github.io/powershell/cmdlets/"
     },
     {
-      name: "PnP.PowerShell 3.x.x",
+      name: "PnP.PowerShell v 3",
       azureAppReq: true,
       ps5: false,
       ps7: true,
       capabilityScore: 7,
       capabilities: [
-        "SharePoint Sites",
-        "M365 Groups",
-        "Teams Members",
-        "M365 Members",
+        "SharePoint Sites", "OneDrive", "Lists", "Libraries", "Pages", "Files", "Folders",
+        "Site Columns", "Content Types", "Web Parts", "Permissions", "Search", "List items", "Views",
+        "SharePoint Navigation", "Site Permissions", "File permissions", "SharePoint Groups",
         "Team Channels w/SP URL",
         "Power Apps",
-        "Power Automate Flows"
+        "Power Automate Flows",
+        "Planner Plans", "SharePoint Containers", "M365 Groups"
       ],
       specializations: ["SharePoint", "Teams", "Groups", "OneDrive"],
       notes: "Requires Azure app registration with certificate authentication (not secret) and PowerShell 7.4.6+. Certificate sharing between IT consultants on the same project is challenging.",
@@ -99,7 +105,7 @@ Connect-PnPOnline -Url https://[yourtenant].sharepoint.com -ClientId <client id 
         "Team Channels w/SP URL",
         "Power Apps",
         "Power Automate Flows",
-        "Power BI Reports"
+        "Power BI Reports", "Bookings", "Calendars","Planner", "Devices", "Search", "Users", "Teams"
       ],
       specializations: ["Everything"],
       notes: "Most comprehensive API across all Microsoft 365 services. Warning: Very slow import times and bloated with so many cmdlets that they don't fully load due to sheer numbers. Requires admin consent even for delegated auth - often blocked for consultants in larger organizations.",
@@ -124,16 +130,16 @@ Connect-MgGraph -TenantId $TenantId -ClientSecretCredential $ClientSecretCredent
       ]
     },
     {
-      name: "AzureAD",
+      name: "AzureAD (Retired)",
       azureAppReq: false,
       ps5: true,
       ps7: false,
-      capabilityScore: 2,
+      capabilityScore: 4,
       capabilities: [
         "M365 Groups",
-        "M365 Members"
+        "M365 Members", "Users", "Groups", "Licenses", "Devices", "Roles", "Policies", "Domains"
       ],
-      specializations: ["Users", "Groups", "Licenses"],
+      specializations: ["Entra ID","Users", "Groups", "Licenses"],
       notes: "Legacy module (retiring March 2025). Basic group membership operations only. Works only in PowerShell 5.",
       installCmd: `Install-Module AzureAD -Scope CurrentUser
 Import-Module AzureAD -Scope CurrentUser`,
@@ -145,10 +151,10 @@ Import-Module AzureAD -Scope CurrentUser`,
       azureAppReq: false,
       ps5: true,
       ps7: false,
-      capabilityScore: 2,
+      capabilityScore: 4,
       capabilities: [
         "Power Apps",
-        "Power Automate Flows"
+        "Power Automate Flows", "Environments", "Licenses"
       ],
       specializations: ["Power Apps", "Flows"],
       notes: "Focused exclusively on Power Apps and Power Automate flow management. Only works in PowerShell 5.",
@@ -162,9 +168,9 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
       azureAppReq: false,
       ps5: true,
       ps7: true,
-      capabilityScore: 1,
+      capabilityScore: 2,
       capabilities: [
-        "Power BI Reports"
+        "Power BI Reports", "Workspaces", "Datasets", "Tables", "Dataflows"
       ],
       specializations: ["Power BI", "Reports", "Dashboards"],
       notes: "Specialized for Power BI administration. Works in both PowerShell 5 and 7.",
@@ -183,9 +189,9 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
       azureAppReq: false,
       ps5: true,
       ps7: true,
-      capabilityScore: 1,
+      capabilityScore: 3,
       capabilities: [
-        "SharePoint Sites"
+        "SharePoint Sites", "SharePoint Tenant Settings", "Hub Sites", "Themes", "Tenant Rename"
       ],
       specializations: ["SharePoint tenant", "SharePoint sites (high-level)"],
       notes: "Classic SharePoint Online management. Retrieves site collections but lacks Teams and M365 Groups integration.",
@@ -225,11 +231,23 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                         `}
                       </div>
                       <div class="flex flex-wrap gap-1">
-                        ${module.specializations && module.specializations.map((spec, idx) => html`
-                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full spec-tag">
-                            ${spec}
-                          </span>
-                        `)}
+                        ${module.specializations && module.specializations.map((spec, idx) => {
+                          const colors = [
+                            'bg-blue-100 text-blue-700',
+                            'bg-green-100 text-green-700', 
+                            'bg-purple-100 text-purple-700',
+                            'bg-pink-100 text-pink-700',
+                            'bg-indigo-100 text-indigo-700',
+                            'bg-orange-100 text-orange-700',
+                            'bg-teal-100 text-teal-700',
+                            'bg-red-100 text-red-700'
+                          ];
+                          return html`
+                            <span key=${idx} class="px-2 py-0.5 ${colors[idx % colors.length]} text-xs rounded-full spec-tag">
+                              ${spec}
+                            </span>
+                          `;
+                        })}
                       </div>
                     </div>
                     <div class="flex items-center gap-2 ml-4">
@@ -250,11 +268,27 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Capabilities:</h5>
                         <div class="flex flex-wrap gap-1">
-                          ${module.capabilities.map((cap, idx) => html`
-                            <span key=${idx} class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                              ${cap}
-                            </span>
-                          `)}
+                          ${module.capabilities.map((cap, idx) => {
+                            const colors = [
+                              'bg-blue-100 text-blue-700',
+                              'bg-green-100 text-green-700', 
+                              'bg-purple-100 text-purple-700',
+                              'bg-pink-100 text-pink-700',
+                              'bg-indigo-100 text-indigo-700',
+                              'bg-orange-100 text-orange-700',
+                              'bg-teal-100 text-teal-700',
+                              'bg-red-100 text-red-700',
+                              'bg-yellow-100 text-yellow-700',
+                              'bg-cyan-100 text-cyan-700',
+                              'bg-emerald-100 text-emerald-700',
+                              'bg-violet-100 text-violet-700'
+                            ];
+                            return html`
+                              <span key=${idx} class="px-2 py-1 ${colors[idx % colors.length]} text-xs rounded-full">
+                                ${cap}
+                              </span>
+                            `;
+                          })}
                         </div>
                       </div>
                       
@@ -275,21 +309,27 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Documentation:</h5>
                         ${module.cmdletUrls ? html`
-                          <div class="space-y-1">
+                          <div class="space-y-2">
                             ${module.cmdletUrls.map((cmdlet, idx) => html`
                               <a key=${idx} href=${cmdlet.url} target="_blank" rel="noopener noreferrer" 
-                                 class="block text-xs text-blue-600 hover:text-blue-800 underline">
-                                ${cmdlet.name} Cmdlets →
+                                 class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                ${cmdlet.name} Cmdlets
                               </a>
                             `)}
                           </div>
                         ` : module.cmdletUrl ? html`
                           <a href=${module.cmdletUrl} target="_blank" rel="noopener noreferrer" 
-                             class="text-xs text-blue-600 hover:text-blue-800 underline">
-                            View Cmdlet Documentation →
+                             class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            View Cmdlet Documentation
                           </a>
                         ` : html`
-                          <span class="text-xs text-gray-500">No documentation available</span>
+                          <span class="text-sm text-gray-500">No documentation available</span>
                         `}
                       </div>
                       
@@ -319,7 +359,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
               </li>
               <li class="flex items-start">
                 <span class="text-orange-600 mr-1">•</span>
-                <span><strong>PnP.PowerShell 3.x:</strong> Certificate-only authentication - no client secrets supported, requires PS 7.4.6+</span>
+                <span><strong>PnP.PowerShell v 3:</strong> Certificate-only authentication - no client secrets supported, requires PS 7.4.6+</span>
               </li>
               <li class="flex items-start">
                 <span class="text-green-600 mr-1">✓</span>
@@ -341,11 +381,23 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                         <span class="text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-1 rounded">⚠️ Admin Consent Required</span>
                       </div>
                       <div class="flex flex-wrap gap-1">
-                        ${module.specializations && module.specializations.map((spec, idx) => html`
-                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full spec-tag">
-                            ${spec}
-                          </span>
-                        `)}
+                        ${module.specializations && module.specializations.map((spec, idx) => {
+                          const colors = [
+                            'bg-blue-100 text-blue-700',
+                            'bg-green-100 text-green-700', 
+                            'bg-purple-100 text-purple-700',
+                            'bg-pink-100 text-pink-700',
+                            'bg-indigo-100 text-indigo-700',
+                            'bg-orange-100 text-orange-700',
+                            'bg-teal-100 text-teal-700',
+                            'bg-red-100 text-red-700'
+                          ];
+                          return html`
+                            <span key=${idx} class="px-2 py-0.5 ${colors[idx % colors.length]} text-xs rounded-full spec-tag">
+                              ${spec}
+                            </span>
+                          `;
+                        })}
                       </div>
                     </div>
                     <div class="flex items-center gap-2 ml-4">
@@ -363,7 +415,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                 ${expandedModules[`azure-${module.name}`] && html`
                   <div class="p-4 bg-gray-50 border-t border-gray-300 expanding-content">
                     <div class="grid gap-4">
-                      ${module.name === 'PnP.PowerShell 3.x.x' ? html`
+                      ${module.name === 'PnP.PowerShell v 3' ? html`
                         <div class="p-3 bg-orange-50 border border-orange-200 rounded">
                           <h5 class="text-xs font-semibold text-gray-900 mb-1">⚠️ Prerequisites:</h5>
                           <ul class="text-xs text-gray-700 space-y-1">
@@ -390,11 +442,27 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Capabilities:</h5>
                         <div class="flex flex-wrap gap-1">
-                          ${module.capabilities.map((cap, idx) => html`
-                            <span key=${idx} class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                              ${cap}
-                            </span>
-                          `)}
+                          ${module.capabilities.map((cap, idx) => {
+                            const colors = [
+                              'bg-blue-100 text-blue-700',
+                              'bg-green-100 text-green-700', 
+                              'bg-purple-100 text-purple-700',
+                              'bg-pink-100 text-pink-700',
+                              'bg-indigo-100 text-indigo-700',
+                              'bg-orange-100 text-orange-700',
+                              'bg-teal-100 text-teal-700',
+                              'bg-red-100 text-red-700',
+                              'bg-yellow-100 text-yellow-700',
+                              'bg-cyan-100 text-cyan-700',
+                              'bg-emerald-100 text-emerald-700',
+                              'bg-violet-100 text-violet-700'
+                            ];
+                            return html`
+                              <span key=${idx} class="px-2 py-1 ${colors[idx % colors.length]} text-xs rounded-full">
+                                ${cap}
+                              </span>
+                            `;
+                          })}
                         </div>
                       </div>
                       
@@ -415,21 +483,27 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Documentation:</h5>
                         ${module.cmdletUrls ? html`
-                          <div class="space-y-1">
+                          <div class="space-y-2">
                             ${module.cmdletUrls.map((cmdlet, idx) => html`
                               <a key=${idx} href=${cmdlet.url} target="_blank" rel="noopener noreferrer" 
-                                 class="block text-xs text-blue-600 hover:text-blue-800 underline">
-                                ${cmdlet.name} Cmdlets →
+                                 class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                ${cmdlet.name} Cmdlets
                               </a>
                             `)}
                           </div>
                         ` : module.cmdletUrl ? html`
                           <a href=${module.cmdletUrl} target="_blank" rel="noopener noreferrer" 
-                             class="text-xs text-blue-600 hover:text-blue-800 underline">
-                            View Cmdlet Documentation →
+                             class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                            View Cmdlet Documentation
                           </a>
                         ` : html`
-                          <span class="text-xs text-gray-500">No documentation available</span>
+                          <span class="text-sm text-gray-500">No documentation available</span>
                         `}
                       </div>
                       
@@ -521,34 +595,96 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                 <div class="bg-gray-50 p-4 border-t">
                   <h4 class="text-sm font-semibold mb-2">Specialization Areas</h4>
                   <div class="flex flex-wrap gap-1 mb-3">
-                    ${module.specializations && module.specializations.map((spec, idx) => html`
-                      <span key=${idx} class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                        ${spec}
-                      </span>
-                    `)}
+                    ${module.specializations && module.specializations.map((spec, idx) => {
+                      const colors = [
+                        'bg-blue-100 text-blue-700',
+                        'bg-green-100 text-green-700', 
+                        'bg-purple-100 text-purple-700',
+                        'bg-pink-100 text-pink-700',
+                        'bg-indigo-100 text-indigo-700',
+                        'bg-orange-100 text-orange-700',
+                        'bg-teal-100 text-teal-700',
+                        'bg-red-100 text-red-700'
+                      ];
+                      return html`
+                        <span key=${idx} class="px-2 py-1 ${colors[idx % colors.length]} text-xs rounded-full font-medium spec-tag">
+                          ${spec}
+                        </span>
+                      `;
+                    })}
                   </div>
                   
                   <h4 class="text-sm font-semibold mb-2 mt-3 pt-3 border-t">Sample Operations</h4>
                   <div class="flex flex-wrap gap-2">
-                    ${module.capabilities.map((cap, capIdx) => html`
-                      <span key=${capIdx} class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full">
-                        ${cap}
-                      </span>
-                    `)}
+                    ${module.capabilities.map((cap, capIdx) => {
+                      const colors = [
+                        'bg-blue-100 text-blue-700',
+                        'bg-green-100 text-green-700', 
+                        'bg-purple-100 text-purple-700',
+                        'bg-pink-100 text-pink-700',
+                        'bg-indigo-100 text-indigo-700',
+                        'bg-orange-100 text-orange-700',
+                        'bg-teal-100 text-teal-700',
+                        'bg-red-100 text-red-700',
+                        'bg-yellow-100 text-yellow-700',
+                        'bg-cyan-100 text-cyan-700',
+                        'bg-emerald-100 text-emerald-700',
+                        'bg-violet-100 text-violet-700'
+                      ];
+                      return html`
+                        <span key=${capIdx} class="px-2 py-1 ${colors[capIdx % colors.length]} text-xs rounded-full">
+                          ${cap}
+                        </span>
+                      `;
+                    })}
                   </div>
                 </div>
                 
-                <div class="border-t">
+                <div class="border-t p-4 bg-gray-50">
+                  <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h5 class="text-sm font-semibold text-gray-700">Cmdlet Reference</h5>
+                  </div>
+                  ${module.cmdletUrls ? html`
+                    <div class="space-y-2 mb-4">
+                      ${module.cmdletUrls.map((cmdlet, idx) => html`
+                        <a key=${idx} href=${cmdlet.url} target="_blank" rel="noopener noreferrer" 
+                           class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                          </svg>
+                          ${cmdlet.name} Cmdlets
+                        </a>
+                      `)}
+                    </div>
+                  ` : module.cmdletUrl ? html`
+                    <div class="mb-4">
+                      <a href=${module.cmdletUrl} target="_blank" rel="noopener noreferrer" 
+                         class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 underline p-2 rounded transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                        View Cmdlet Documentation
+                      </a>
+                    </div>
+                  ` : html`
+                    <div class="mb-4">
+                      <span class="text-sm text-gray-500">No documentation available</span>
+                    </div>
+                  `}
+                  
                   <button 
                     onClick=${() => toggleExpanded(module.name)}
-                    class="w-full p-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                    class="w-full p-2 text-left flex items-center justify-between hover:bg-gray-100 transition-colors rounded border-t border-gray-200"
                   >
                     <span class="text-sm font-medium">Installation & Authentication</span>
                     <span class="text-gray-400">${expandedModules[module.name] ? '−' : '+'}</span>
                   </button>
                   
                   ${expandedModules[module.name] && html`
-                    <div class="p-4 bg-gray-50 border-t">
+                    <div class="p-4 bg-white border-t border-gray-200 rounded-b expanding-content">
                       <div class="mb-4">
                         <h5 class="text-xs font-semibold text-gray-700 mb-2">Install Commands:</h5>
                         <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
@@ -561,27 +697,6 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                         <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
                           <code>${module.authCmd}</code>
                         </pre>
-                      </div>
-                      
-                      <div>
-                        <h5 class="text-xs font-semibold text-gray-700 mb-2">Cmdlet Reference:</h5>
-                        ${module.cmdletUrls ? html`
-                          <div class="space-y-1">
-                            ${module.cmdletUrls.map((cmdlet, idx) => html`
-                              <a key=${idx} href=${cmdlet.url} target="_blank" rel="noopener noreferrer" 
-                                 class="block text-xs text-blue-600 hover:text-blue-800 underline">
-                                ${cmdlet.name} Cmdlets →
-                              </a>
-                            `)}
-                          </div>
-                        ` : module.cmdletUrl ? html`
-                          <a href=${module.cmdletUrl} target="_blank" rel="noopener noreferrer" 
-                             class="text-xs text-blue-600 hover:text-blue-800 underline">
-                            View Cmdlet Documentation →
-                          </a>
-                        ` : html`
-                          <span class="text-xs text-gray-500">No documentation available</span>
-                        `}
                       </div>
                     </div>
                   `}
