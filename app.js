@@ -96,7 +96,7 @@ Connect-PnPOnline -Url https://[yourtenant].sharepoint.com -ClientId <client id 
       azureAppReq: true, // Always requires app registration and admin consent
       ps5: true,
       ps7: true,
-      capabilityScore: 8,
+      capabilityScore: 7,
       capabilities: [
         "SharePoint Sites",
         "M365 Groups",
