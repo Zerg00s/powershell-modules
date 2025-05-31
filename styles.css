@@ -1,0 +1,179 @@
+/* Custom styles for PowerShell Module Guide */
+
+/* Clean, professional background */
+body {
+  background: #f8fafc;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Subtle background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, #e0e7ff 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, #fce7f3 0%, transparent 50%);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+/* Clean card design with subtle shadows */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Professional hover effects for module cards */
+.module-card {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.module-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Clean animated title */
+.animated-title {
+  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #1e40af 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 8s ease infinite;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+/* Subtle accent borders */
+.pulse-border {
+  position: relative;
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* Code block styling */
+pre {
+  position: relative;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+pre::before {
+  content: 'PowerShell';
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  border-bottom-left-radius: 4px;
+  font-family: monospace;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Clean button interactions */
+button {
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+button:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Professional floating effect for key takeaways */
+.float-animation {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Clean hover effect for specialization tags */
+.spec-tag {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.spec-tag:hover {
+  border-color: currentColor;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Smooth expanding sections */
+.expanding-content {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.01em;
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for all interactive elements */
+a, button, .module-card, .spec-tag {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Professional box shadows */
+.shadow-elegant {
+  box-shadow: 
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-elegant-lg {
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

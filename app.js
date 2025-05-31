@@ -87,7 +87,7 @@ Connect-PnPOnline -Url https://[yourtenant].sharepoint.com -ClientId <client id 
     },
     {
       name: "Microsoft.Graph",
-      azureAppReq: true,
+      azureAppReq: true, // Always requires app registration and admin consent
       ps5: true,
       ps7: true,
       capabilityScore: 8,
@@ -102,10 +102,19 @@ Connect-PnPOnline -Url https://[yourtenant].sharepoint.com -ClientId <client id 
         "Power BI Reports"
       ],
       specializations: ["Everything"],
-      notes: "Most comprehensive API across all Microsoft 365 services. Warning: Very slow import times and bloated with so many cmdlets that they don't fully load due to sheer numbers. Requires complex setup and permission configuration.",
+      notes: "Most comprehensive API across all Microsoft 365 services. Warning: Very slow import times and bloated with so many cmdlets that they don't fully load due to sheer numbers. Requires admin consent even for delegated auth - often blocked for consultants in larger organizations.",
       installCmd: `Install-Module -Name Microsoft.Graph -Scope CurrentUser -AllowClobber
 Import-Module Microsoft.Graph`,
-      authCmd: `Connect-MgGraph -Scopes "Group.Read.All", "User.Read.All", "Directory.Read.All", "Sites.Read.All", "Sites.ReadWrite.All"`,
+      authCmd: `# Delegated Authentication (requires admin pre-consent)
+Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All"
+# Note: Will fail if admin hasn't pre-consented to these permissions
+
+# App-Only Authentication (Certificate)
+Connect-MgGraph -ClientId "YOUR_APP_ID" -TenantId "YOUR_TENANT_ID" -CertificateThumbprint "YOUR_CERT_THUMBPRINT"
+
+# App-Only Authentication (Client Secret)
+$ClientSecretCredential = New-Object System.Management.Automation.PSCredential -ArgumentList $ApplicationClientId, (ConvertTo-SecureString -String $ApplicationClientSecret -AsPlainText -Force)
+Connect-MgGraph -TenantId $TenantId -ClientSecretCredential $ClientSecretCredential`,
       cmdletUrls: [
         { name: "Users", url: "https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.users/?view=graph-powershell-1.0" },
         { name: "Teams", url: "https://learn.microsoft.com/en-us/powershell/module/microsoft.graph.teams/?view=graph-powershell-1.0" },
@@ -189,23 +198,23 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
   const getRecommendations = () => {
     // Filter modules that don't require Azure App Registration
     const consultantFriendlyModules = modules.filter(m => !m.azureAppReq);
-    // Filter modules that require Azure App Registration
-    const azureAppRequiredModules = modules.filter(m => m.azureAppReq);
+    // Modules that require Azure App Registration
+    const advancedModules = modules.filter(m => m.azureAppReq);
     
     return html`
       <div class="mt-8">
-        <div class="p-4 border-2 border-green-300 rounded-lg bg-green-50">
-          <h4 class="font-bold text-green-800 mb-3">Best for IT Consultants - No Azure App Registration Required</h4>
+        <div class="p-4 border-2 border-green-600 rounded-lg bg-white glass-card pulse-border">
+          <h4 class="font-bold text-gray-900 mb-3">Best for IT Consultants - No Azure App Registration Required</h4>
           <p class="text-sm text-gray-700 mb-3">
             These modules work without Azure App Registration, making them ideal for IT consultants. 
             Getting Azure App registrations is often very challenging when working with clients.
           </p>
           <div class="space-y-2">
             ${consultantFriendlyModules.map(module => html`
-              <div class="bg-white rounded border border-green-200 overflow-hidden">
+              <div class="bg-white rounded border border-gray-300 overflow-hidden shadow-sm">
                 <button
                   onClick=${() => toggleExpanded(`consultant-${module.name}`)}
-                  class="w-full p-3 hover:bg-green-50 transition-colors"
+                  class="w-full p-3 hover:bg-gray-50 transition-colors"
                 >
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
@@ -217,7 +226,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       </div>
                       <div class="flex flex-wrap gap-1">
                         ${module.specializations && module.specializations.map((spec, idx) => html`
-                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
+                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full spec-tag">
                             ${spec}
                           </span>
                         `)}
@@ -236,13 +245,13 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                 </button>
                 
                 ${expandedModules[`consultant-${module.name}`] && html`
-                  <div class="p-4 bg-gray-50 border-t border-green-200">
+                  <div class="p-4 bg-gray-50 border-t border-gray-300 expanding-content">
                     <div class="grid gap-4">
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Capabilities:</h5>
                         <div class="flex flex-wrap gap-1">
                           ${module.capabilities.map((cap, idx) => html`
-                            <span key=${idx} class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                            <span key=${idx} class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
                               ${cap}
                             </span>
                           `)}
@@ -295,45 +304,45 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
           </div>
         </div>
         
-        <div class="mt-6 p-4 border-2 border-amber-300 rounded-lg bg-amber-50">
-          <h4 class="font-bold text-amber-800 mb-3">Advanced Modules - Azure App Registration Required</h4>
+        <div class="mt-6 p-4 border-2 border-amber-600 rounded-lg bg-white glass-card pulse-border">
+          <h4 class="font-bold text-gray-900 mb-3">Advanced Modules - Azure App Registration Required</h4>
           <p class="text-sm text-gray-700 mb-3">
             <strong>When to use:</strong> Best for large, long-lasting projects where PIM gets in the way and you need automation.<br/>
-            <strong>When to avoid:</strong> For smaller projects or when you run PowerShell rarely - the setup effort isn't worth it.
+            <strong>Reality check:</strong> Both modules require admin involvement - Graph needs consent even for delegated auth.
           </p>
-          <div class="bg-white p-3 rounded border border-amber-200 mb-3">
-            <h5 class="text-sm font-semibold text-gray-800 mb-2">🔑 Authentication Benefits:</h5>
+          <div class="bg-gray-50 p-3 rounded border border-gray-300 mb-3">
+            <h5 class="text-sm font-semibold text-gray-900 mb-2">⚠️ Authentication Reality for IT Consultants:</h5>
             <ul class="text-xs text-gray-700 space-y-1">
               <li class="flex items-start">
-                <span class="text-green-600 mr-1">✓</span>
-                <span><strong>Unattended execution:</strong> Client App authentication runs without browser pop-ups for OAuth</span>
+                <span class="text-red-600 mr-1">•</span>
+                <span><strong>Microsoft.Graph:</strong> Delegated auth often fails - requires Global Admin to pre-consent to permissions. In larger orgs, Graph API is restricted to specific accounts only.</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-orange-600 mr-1">•</span>
+                <span><strong>PnP.PowerShell 3.x:</strong> Certificate-only authentication - no client secrets supported, requires PS 7.4.6+</span>
               </li>
               <li class="flex items-start">
                 <span class="text-green-600 mr-1">✓</span>
-                <span><strong>No PIM hassles:</strong> Unlike user authentication with PIM, no need to request admin roles each time</span>
-              </li>
-              <li class="flex items-start">
-                <span class="text-green-600 mr-1">✓</span>
-                <span><strong>Automation-friendly:</strong> Perfect for scheduled tasks and CI/CD pipelines</span>
+                <span><strong>App-only benefits:</strong> Once set up - unattended execution, no PIM pop-ups, perfect for automation</span>
               </li>
             </ul>
           </div>
           <div class="space-y-2">
-            ${azureAppRequiredModules.map(module => html`
-              <div class="bg-white rounded border border-amber-200 overflow-hidden">
+            ${advancedModules.map(module => html`
+              <div class="bg-white rounded border border-gray-300 overflow-hidden shadow-sm">
                 <button
                   onClick=${() => toggleExpanded(`azure-${module.name}`)}
-                  class="w-full p-3 hover:bg-amber-50 transition-colors"
+                  class="w-full p-3 hover:bg-gray-50 transition-colors"
                 >
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
                         <span class="font-semibold text-sm">${module.name}</span>
-                        <span class="text-xs font-semibold text-amber-700">⚠️ Azure App Required</span>
+                        <span class="text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-1 rounded">⚠️ Admin Consent Required</span>
                       </div>
                       <div class="flex flex-wrap gap-1">
                         ${module.specializations && module.specializations.map((spec, idx) => html`
-                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">
+                          <span key=${idx} class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full spec-tag">
                             ${spec}
                           </span>
                         `)}
@@ -352,27 +361,37 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                 </button>
                 
                 ${expandedModules[`azure-${module.name}`] && html`
-                  <div class="p-4 bg-gray-50 border-t border-amber-200">
+                  <div class="p-4 bg-gray-50 border-t border-gray-300 expanding-content">
                     <div class="grid gap-4">
-                      <div class="p-3 bg-amber-100 border border-amber-300 rounded">
-                        <h5 class="text-xs font-semibold text-amber-800 mb-1">⚠️ Prerequisites:</h5>
-                        <ul class="text-xs text-amber-700 space-y-1">
-                          <li>• Azure AD App Registration</li>
-                          <li>• Admin consent for API permissions</li>
-                          <li>• Client ID and Tenant ID</li>
-                          ${module.name === 'PnP.PowerShell 3.x.x' && html`
+                      ${module.name === 'PnP.PowerShell 3.x.x' ? html`
+                        <div class="p-3 bg-orange-50 border border-orange-200 rounded">
+                          <h5 class="text-xs font-semibold text-gray-900 mb-1">⚠️ Prerequisites:</h5>
+                          <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• Azure AD App Registration (mandatory)</li>
                             <li>• PowerShell 7.4.6 or higher</li>
-                            <li>• Certificate authentication (secrets not supported)</li>
+                            <li>• Certificate authentication only (secrets not supported)</li>
                             <li>• Certificate must be shared with team members</li>
-                          `}
-                        </ul>
-                      </div>
+                            <li>• Admin consent for API permissions</li>
+                          </ul>
+                        </div>
+                      ` : html`
+                        <div class="p-3 bg-orange-50 border border-orange-200 rounded">
+                          <h5 class="text-xs font-semibold text-gray-900 mb-1">⚠️ Prerequisites:</h5>
+                          <ul class="text-xs text-gray-700 space-y-1">
+                            <li>• Global Admin must pre-consent to API permissions</li>
+                            <li>• In larger orgs, Graph API access is restricted to allowed accounts</li>
+                            <li>• Delegated auth will fail without admin consent</li>
+                            <li>• For app-only: Azure AD App Registration required</li>
+                            <li>• Works with PowerShell 5 and 7</li>
+                          </ul>
+                        </div>
+                      `}
                       
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Capabilities:</h5>
                         <div class="flex flex-wrap gap-1">
                           ${module.capabilities.map((cap, idx) => html`
-                            <span key=${idx} class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                            <span key=${idx} class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
                               ${cap}
                             </span>
                           `)}
@@ -439,8 +458,8 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
         <h2 class="text-xl font-bold mb-4">Capability Overview</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           ${modules.map((module, idx) => html`
-              <div key=${idx} class=${`border rounded-lg overflow-hidden ${module.azureAppReq ? 'border-amber-300' : 'border-gray-200'}`}>
-                <div class=${`p-4 ${module.azureAppReq ? 'bg-amber-50' : 'bg-white'}`}>
+              <div key=${idx} class=${`border rounded-lg overflow-hidden module-card glass-card shadow-sm ${module.azureAppReq ? 'border-orange-400' : 'border-gray-300'}`}>
+                <div class=${`p-4 ${module.azureAppReq ? 'bg-orange-50' : 'bg-white'}`}>
                   <div class="flex justify-between items-start">
                     <h3 class="font-bold text-lg">${module.name}</h3>
                     <div class="flex">
@@ -491,10 +510,10 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                     `)}
                   </div>
                   
-                  <h4 class="text-sm font-semibold mb-2 mt-3 pt-3 border-t">Supported Operations</h4>
+                  <h4 class="text-sm font-semibold mb-2 mt-3 pt-3 border-t">Sample Operations</h4>
                   <div class="flex flex-wrap gap-2">
                     ${module.capabilities.map((cap, capIdx) => html`
-                      <span key=${capIdx} class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                      <span key=${capIdx} class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full">
                         ${cap}
                       </span>
                     `)}
@@ -607,6 +626,54 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
           </p>
         </div>
       </div>
+      
+      <footer class="mt-12 bg-gray-900 text-white rounded-t-xl">
+        <div class="container mx-auto px-4 py-8">
+          <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="text-center md:text-left">
+              <p class="text-sm">PowerShell Module Reference Guide</p>
+              <p class="text-xs text-gray-400 mt-1">By Denis Molodtsov with 💗</p>
+            </div>
+            <div class="flex space-x-4">
+              <a href="https://github.com/Zerg00s/powershell-modules" 
+                 class="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                 title="Github">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </a>
+              <a href="https://twitter.com/Zerg00s" 
+                 class="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                 title="Twitter">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                </svg>
+              </a>
+              <a href="https://www.linkedin.com/in/molodtsovd/" 
+                 class="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                 title="LinkedIn">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+              </a>
+              <a href="https://www.youtube.com/channel/UC7LORag5pdtpAFoNHJJkPKg" 
+                 class="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                 title="YouTube Channel">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
+              <a href="https://spdenis.com/" 
+                 class="group flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                 title="Blog">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   `;
 };
