@@ -760,6 +760,17 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
         </div>
       </div>
       
+      <div class="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-300 shadow-sm">
+        <h4 class="font-semibold text-amber-900 mb-2">Tip: Install Modules to a Predictable Location</h4>
+        <p class="text-sm text-amber-800 mb-3">
+          Many organizations redirect user profile folders to OneDrive, which breaks <code class="bg-amber-100 px-1 rounded">-Scope CurrentUser</code> module installations.
+          Use <code class="bg-amber-100 px-1 rounded">Save-Module</code> with a custom local path instead:
+        </p>
+        <pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>${`New-Item -Path "C:\\PSModules" -ItemType Directory -Force
+\$env:PSModulePath += ";C:\\PSModules"
+Save-Module -Name MicrosoftTeams -Path C:\\PSModules`}</code></pre>
+      </div>
+
       <footer class="mt-12 bg-gray-900 text-white rounded-t-xl">
         <div class="container mx-auto px-4 py-8">
           <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
