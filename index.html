@@ -11,6 +11,9 @@
     <!-- Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Prism syntax highlighting (PowerShell) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./styles.css">
     
@@ -36,6 +39,10 @@
 <body>
     <div id="root"></div>
     
+    <!-- Prism core + PowerShell grammar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+
     <!-- Our app -->
     <script type="module" src="./app.js"></script>
 </body>

@@ -1,179 +1,327 @@
-/* Custom styles for PowerShell Module Guide */
+/* ============================================================
+   Microsoft Fluent UI / Modern Outlook design language
+   Tokens follow Fluent 2 (Web) + Outlook modern surfaces.
+   ============================================================ */
 
-/* Clean, professional background */
+:root {
+  /* Brand ramp (Fluent communication blue) */
+  --brand-primary: #0f6cbd;
+  --brand-hover: #115ea3;
+  --brand-pressed: #0c3b5e;
+  --brand-tint: #ebf3fc;
+  --brand-tint-border: #c7e0f4;
+
+  /* Neutral ramp */
+  --neutral-bg: #faf9f8;          /* app canvas */
+  --neutral-layer: #ffffff;       /* card surface */
+  --neutral-subtle: #f5f5f5;      /* subtle fill */
+  --neutral-subtle-hover: #f0f0f0;
+  --neutral-stroke: #e1dfdd;      /* card border */
+  --neutral-stroke-2: #d2d0ce;
+  --text-primary: #242424;
+  --text-secondary: #605e5c;
+  --text-disabled: #a19f9d;
+
+  /* Status */
+  --status-warning: #ca5010;
+  --status-warning-bg: #fff4ce;
+  --status-warning-border: #f2d98f;
+
+  /* Fluent radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* Fluent elevation (depth) shadows */
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --shadow-4: 0 2px 4px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --shadow-8: 0 4px 8px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+  --shadow-16: 0 8px 16px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.12);
+
+  --font-base: "Segoe UI", "Segoe UI Web (West European)", -apple-system,
+    BlinkMacSystemFont, system-ui, "Helvetica Neue", sans-serif;
+}
+
+/* Fluent uses Segoe UI everywhere */
+html,
 body {
-  background: #f8fafc;
+  font-family: var(--font-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--neutral-bg);
   min-height: 100vh;
   position: relative;
 }
 
-/* Subtle background pattern */
+/* Outlook-modern canvas: flat neutral, no decorative gradients */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 25% 25%, #e0e7ff 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, #fce7f3 0%, transparent 50%);
-  opacity: 0.3;
-  z-index: -1;
+  content: none;
 }
 
-/* Clean card design with subtle shadows */
-.glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Professional hover effects for module cards */
-.module-card {
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.module-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Clean animated title */
-.animated-title {
-  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #1e40af 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientShift 8s ease infinite;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-/* Subtle accent borders */
-.pulse-border {
-  position: relative;
-  border-width: 2px;
-  border-style: solid;
-}
-
-/* Code block styling */
-pre {
-  position: relative;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-}
-
-pre::before {
-  content: 'PowerShell';
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 10px;
-  border-bottom-left-radius: 4px;
-  font-family: monospace;
-}
-
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Clean button interactions */
+/* ---- Surfaces -------------------------------------------------- */
+
+/* Fluent card: opaque layer, hairline stroke, depth-4 elevation */
+.glass-card {
+  background: var(--neutral-layer) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid var(--neutral-stroke);
+  box-shadow: var(--shadow-4);
+}
+
+.module-card {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  position: relative;
+  border-radius: var(--radius-lg) !important;
+}
+
+.module-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-16);
+}
+
+/* Fluent doesn't pulse borders, so keep them crisp */
+.pulse-border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+.shadow-elegant {
+  box-shadow: var(--shadow-2);
+}
+
+.shadow-elegant-lg {
+  box-shadow: var(--shadow-8);
+}
+
+/* ---- Title ----------------------------------------------------- */
+
+/* Solid Fluent brand color, semibold, tight tracking, no animation */
+.animated-title {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  color: var(--brand-primary);
+  animation: none;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Neutralize remaining decorative animation */
+.float-animation {
+  animation: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+/* ---- Code surfaces (Fluent dark neutral) ---------------------- */
+
+pre {
+  position: relative;
+  background: #1b1a19 !important;
+  border: 1px solid #322f2d;
+  border-radius: var(--radius-lg) !important;
+  padding: 2.25rem 1rem 1rem !important;
+  box-shadow: var(--shadow-2);
+  line-height: 1.6;
+}
+
+/* Title bar with PowerShell label + faux window dots */
+pre::before {
+  content: "PowerShell";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid #322f2d;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  font-family: "Cascadia Code", "Consolas", monospace;
+  padding-left: 56px;
+  text-align: left;
+}
+
+pre::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f56;
+  box-shadow: 14px 0 0 #ffbd2e, 28px 0 0 #27c93f;
+}
+
+pre code {
+  font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+  text-shadow: none !important;
+  background: transparent !important;
+}
+
+/* ---- Copy-to-clipboard ---------------------------------------- */
+
+.code-block {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  font-family: var(--font-base);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.copy-btn:active {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.copy-btn.is-copied {
+  color: #6cc070;
+  border-color: rgba(108, 192, 112, 0.5);
+  background: rgba(108, 192, 112, 0.14);
+}
+
+.copy-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.copy-btn:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 1px;
+}
+
+/* Prism-tomorrow token tuning for the dark surface */
+pre code .token.comment {
+  color: #7c7c7c;
+  font-style: italic;
+}
+pre code .token.string {
+  color: #b5cea8;
+}
+pre code .token.function {
+  color: #4ec9b0;
+}
+pre code .token.keyword {
+  color: #569cd6;
+}
+pre code .token.operator {
+  color: #d4d4d4;
+  background: transparent;
+}
+pre code .token.variable {
+  color: #9cdcfe;
+}
+pre code .token.namespace {
+  color: #c586c0;
+  opacity: 1;
+}
+
+/* ---- Interaction ---------------------------------------------- */
+
 button {
   position: relative;
-  transition: all 0.15s ease;
+  transition: background-color 0.1s ease;
+  font-family: var(--font-base);
 }
 
 button:hover {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: var(--neutral-subtle-hover);
 }
 
+/* Fluent has no scale-press on generic buttons */
 button:active {
-  transform: scale(0.98);
+  transform: none;
 }
 
-/* Professional floating effect for key takeaways */
-.float-animation {
-  animation: gentleFloat 4s ease-in-out infinite;
-}
-
-@keyframes gentleFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-}
-
-/* Clean hover effect for specialization tags */
 .spec-tag {
-  transition: all 0.2s ease;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease;
   border: 1px solid transparent;
+  border-radius: var(--radius-sm) !important;
 }
 
 .spec-tag:hover {
-  border-color: currentColor;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2);
+  transform: none;
 }
 
-/* Smooth expanding sections */
+/* Fluent rounded pills → squared-soft chips */
+.rounded-full {
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Fluent focus indicator: 2px brand outline with offset */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+a,
+button,
+.module-card,
+.spec-tag {
+  transition-property: background-color, box-shadow, color;
+  transition-timing-function: cubic-bezier(0.33, 0, 0.67, 1);
+  transition-duration: 120ms;
+}
+
+/* Fluent motion: subtle, fast ease-out reveal */
 .expanding-content {
-  animation: slideIn 0.2s ease-out;
+  animation: fluentReveal 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
-@keyframes slideIn {
+@keyframes fluentReveal {
   from {
     opacity: 0;
-    transform: translateY(-5px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Typography improvements */
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.01em;
-}
-
-/* Focus states for accessibility */
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Smooth transitions for all interactive elements */
-a, button, .module-card, .spec-tag {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Professional box shadows */
-.shadow-elegant {
-  box-shadow: 
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.shadow-elegant-lg {
-  box-shadow: 
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }

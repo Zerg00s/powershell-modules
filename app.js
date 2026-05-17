@@ -5,12 +5,81 @@ const html = htm.bind(React.createElement);
 const ModuleComparison = () => {
   const [expandedModules, setExpandedModules] = React.useState({});
 
+  // Re-run PowerShell syntax highlighting after render / when sections expand
+  React.useEffect(() => {
+    if (window.Prism) window.Prism.highlightAll();
+  }, [expandedModules]);
+
   const toggleExpanded = (moduleName) => {
     setExpandedModules(prev => ({
       ...prev,
       [moduleName]: !prev[moduleName]
     }));
   };
+
+  // Official Microsoft / PowerShell product logos, mapped per module
+  const getLogo = (name) => {
+    if (name.startsWith('ExchangeOnline')) return './logos/exchange.png';
+    if (name.startsWith('MicrosoftTeams')) return './logos/teams.svg';
+    if (name.startsWith('PnP.PowerShell')) return './logos/sharepoint.png';
+    if (name.startsWith('Microsoft.Online.SharePoint')) return './logos/sharepoint.png';
+    if (name.startsWith('Microsoft.Graph')) return './logos/microsoft.png';
+    if (name.startsWith('AzureAD')) return './logos/microsoft.png';
+    if (name.startsWith('Microsoft PowerApps')) return './logos/powerapps.svg';
+    if (name.startsWith('MicrosoftPowerBIMgmt')) return './logos/powerbi.svg';
+    return './logos/powershell.svg';
+  };
+
+  // PowerShell code block with a copy-to-clipboard button
+  const CodeBlock = ({ code }) => {
+    const [copied, setCopied] = React.useState(false);
+    const copy = () => {
+      const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done).catch(() => {});
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    };
+    return html`
+      <div class="code-block">
+        <button
+          type="button"
+          class=${`copy-btn${copied ? ' is-copied' : ''}`}
+          onClick=${copy}
+          aria-label=${copied ? 'Copied' : 'Copy code to clipboard'}
+        >
+          ${copied ? html`
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Copied
+          ` : html`
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+              <path d="M5 15V5a2 2 0 012-2h10"></path>
+            </svg>
+            Copy
+          `}
+        </button>
+        <pre class="bg-gray-800 text-gray-100 text-xs overflow-x-auto"><code class="language-powershell">${code}</code></pre>
+      </div>
+    `;
+  };
+
+  const ModuleLogo = ({ name, size = 24 }) => html`
+    <img
+      src=${getLogo(name)}
+      alt=""
+      aria-hidden="true"
+      style=${{ width: `${size}px`, height: `${size}px`, objectFit: 'contain', flexShrink: 0 }}
+    />
+  `;
 
   const modules = [
     {
@@ -225,6 +294,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
+                        <${ModuleLogo} name=${module.name} size=${20} />
                         <span class="font-semibold text-sm">${module.name}</span>
                         ${module.name === 'AzureAD' && html`
                           <span class="text-xs font-bold text-red-600">(Retiring March 2025)</span>
@@ -294,16 +364,12 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Installation:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.installCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.installCmd} />
                       </div>
                       
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Connect Command:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.authCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.authCmd} />
                       </div>
                       
                       <div>
@@ -377,6 +443,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <div class="flex items-center gap-2 mb-2">
+                        <${ModuleLogo} name=${module.name} size=${20} />
                         <span class="font-semibold text-sm">${module.name}</span>
                         <span class="text-xs font-semibold text-orange-700 bg-orange-100 px-2 py-1 rounded">⚠️ Admin Consent Required</span>
                       </div>
@@ -468,16 +535,12 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                       
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Installation:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.installCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.installCmd} />
                       </div>
                       
                       <div>
                         <h5 class="text-xs font-semibold text-gray-700 mb-1">Authentication:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.authCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.authCmd} />
                       </div>
                       
                       <div>
@@ -525,23 +588,15 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
   return html`
     <div class="container mx-auto p-4 font-sans">
       <header class="mb-12 text-center py-8">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4 animated-title leading-tight">
-          Microsoft 365 PowerShell Modules
-        </h1>
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <img src="./logos/powershell.svg" alt="PowerShell" style=${{ width: '44px', height: '44px' }} />
+          <h1 class="text-4xl md:text-5xl font-bold animated-title leading-tight">
+            Microsoft 365 PowerShell Modules
+          </h1>
+        </div>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto">
           Reference Guide for Busy IT Consultants
         </p>
-        <div class="mt-6 flex justify-center gap-4 text-sm">
-          <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
-            💼 Consultant-Focused
-          </span>
-          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">
-            ⚡ Quick Reference
-          </span>
-          <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
-            🔐 Auth Guidance
-          </span>
-        </div>
       </header>
       
       ${getRecommendations()}
@@ -553,7 +608,10 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
               <div key=${idx} class=${`border rounded-lg overflow-hidden module-card glass-card shadow-sm ${module.azureAppReq ? 'border-orange-400' : 'border-gray-300'}`}>
                 <div class=${`p-4 ${module.azureAppReq ? 'bg-orange-50' : 'bg-white'}`}>
                   <div class="flex justify-between items-start">
-                    <h3 class="font-bold text-lg">${module.name}</h3>
+                    <div class="flex items-center gap-2">
+                      <${ModuleLogo} name=${module.name} size=${28} />
+                      <h3 class="font-bold text-lg">${module.name}</h3>
+                    </div>
                     <div class="flex">
                       <span class=${`text-xs font-bold px-2 py-1 rounded ${module.ps5 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'} mr-1`}>
                         PS5
@@ -687,16 +745,12 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
                     <div class="p-4 bg-white border-t border-gray-200 rounded-b expanding-content">
                       <div class="mb-4">
                         <h5 class="text-xs font-semibold text-gray-700 mb-2">Install Commands:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.installCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.installCmd} />
                       </div>
                       
                       <div class="mb-4">
                         <h5 class="text-xs font-semibold text-gray-700 mb-2">Authentication:</h5>
-                        <pre class="bg-gray-800 text-gray-100 p-2 rounded text-xs overflow-x-auto">
-                          <code>${module.authCmd}</code>
-                        </pre>
+                        <${CodeBlock} code=${module.authCmd} />
                       </div>
                     </div>
                   `}
@@ -706,17 +760,17 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
         </div>
       </div>
 
-      <div class="mt-16 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-xl shadow-lg p-8 border border-purple-200 glass-card float-animation">
+      <div class="mt-16 bg-white rounded-lg shadow-lg p-8 border border-gray-200 glass-card">
         <div class="flex items-center mb-4">
-          <div class="p-2 bg-purple-600 rounded-lg mr-3">
+          <div class="p-2 rounded-md mr-3" style=${{ backgroundColor: '#0f6cbd' }}>
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Key Takeaways</h3>
+          <h3 class="text-xl font-bold" style=${{ color: '#0f6cbd' }}>Key Takeaways</h3>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-purple-100">
+          <div class="bg-gray-50 rounded-md p-4 shadow-sm border border-gray-200">
             <div class="flex items-start">
               <span class="text-purple-500 mr-2 text-lg">•</span>
               <div>
@@ -725,7 +779,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
               </div>
             </div>
           </div>
-          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-purple-100">
+          <div class="bg-gray-50 rounded-md p-4 shadow-sm border border-gray-200">
             <div class="flex items-start">
               <span class="text-pink-500 mr-2 text-lg">•</span>
               <div>
@@ -734,7 +788,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
               </div>
             </div>
           </div>
-          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-purple-100">
+          <div class="bg-gray-50 rounded-md p-4 shadow-sm border border-gray-200">
             <div class="flex items-start">
               <span class="text-indigo-500 mr-2 text-lg">•</span>
               <div>
@@ -743,7 +797,7 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
               </div>
             </div>
           </div>
-          <div class="bg-white/80 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-purple-100">
+          <div class="bg-gray-50 rounded-md p-4 shadow-sm border border-gray-200">
             <div class="flex items-start">
               <span class="text-red-500 mr-2 text-lg">•</span>
               <div>
@@ -753,22 +807,92 @@ Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope Current
             </div>
           </div>
         </div>
-        <div class="mt-4 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-          <p class="text-sm text-blue-800 font-medium">
+        <div class="mt-4 p-3 rounded-md border" style=${{ backgroundColor: '#ebf3fc', borderColor: '#c7e0f4' }}>
+          <p class="text-sm font-medium" style=${{ color: '#115ea3' }}>
             💡 <span class="font-semibold">Pro Tip:</span> Start with ExchangeOnlineManagement, MicrosoftTeams, Microsoft.Online.SharePoint.PowerShell, or PnP.PowerShell 1.12.0 for immediate productivity without complex setup
           </p>
         </div>
       </div>
       
       <div class="mt-8 p-4 bg-amber-50 rounded-lg border border-amber-300 shadow-sm">
-        <h4 class="font-semibold text-amber-900 mb-2">Tip: Install Modules to a Predictable Location</h4>
+        <h4 class="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+          <img src="./logos/powershell.svg" alt="" aria-hidden="true" style=${{ width: '20px', height: '20px' }} />
+          Tip: Install Modules to a Predictable Location
+        </h4>
         <p class="text-sm text-amber-800 mb-3">
           Many organizations redirect user profile folders to OneDrive, which breaks <code class="bg-amber-100 px-1 rounded">-Scope CurrentUser</code> module installations.
           Use <code class="bg-amber-100 px-1 rounded">Save-Module</code> with a custom local path instead:
         </p>
-        <pre class="bg-gray-800 text-gray-100 p-3 rounded text-xs overflow-x-auto"><code>${`New-Item -Path "C:\\PSModules" -ItemType Directory -Force
+        <${CodeBlock} code=${`New-Item -Path "C:\\PSModules" -ItemType Directory -Force
 \$env:PSModulePath += ";C:\\PSModules"
-Save-Module -Name MicrosoftTeams -Path C:\\PSModules`}</code></pre>
+Save-Module -Name MicrosoftTeams -Path C:\\PSModules`} />
+      </div>
+
+      <div class="mt-8 p-6 bg-white rounded-lg border border-gray-200 glass-card">
+        <h4 class="font-semibold text-lg mb-2 flex items-center gap-2" style=${{ color: '#0f6cbd' }}>
+          <img src="./logos/powershell.svg" alt="" aria-hidden="true" style=${{ width: '22px', height: '22px' }} />
+          Universal Fix: Run it to make sure PowerShell modules are loaded correctly
+        </h4>
+        <p class="text-sm text-gray-700 mb-3">
+          Run this if OneDrive folder redirection has hidden your installed modules from Windows PowerShell 5.1. It is safe to run repeatedly.
+        </p>
+        <${CodeBlock} code=${`$docsPath = [Environment]::GetFolderPath('MyDocuments')
+$ps5Path = Join-Path $docsPath 'WindowsPowerShell\\Modules'
+$regKey = Get-Item 'HKCU:\\Environment'
+
+$currentPath = $regKey.GetValue('PSModulePath', '', 'DoNotExpandEnvironmentNames')
+$pathArray = $currentPath -split ';' | Where-Object { $_ }
+
+if ($ps5Path -notin $pathArray) {
+    $pathArray += $ps5Path
+    Set-ItemProperty -Path 'HKCU:\\Environment' -Name 'PSModulePath' -Value ($pathArray -join ';') -Type ExpandString
+    Write-Host "Successfully repaired Windows PowerShell 5.1 module path." -ForegroundColor Green
+} else {
+    Write-Host "Windows PowerShell 5.1 module path is already correct." -ForegroundColor Cyan
+}
+
+if ($ps5Path -notin ($env:PSModulePath -split ';')) { $env:PSModulePath += ";$ps5Path" }`} />
+      </div>
+
+      <div class="mt-12 rounded-lg overflow-hidden glass-card shadow-lg border" style=${{ borderColor: '#c7e0f4' }}>
+        <div class="px-6 py-2 text-xs font-semibold tracking-wide uppercase text-white" style=${{ backgroundColor: '#0f6cbd' }}>
+          No PowerShell? No App Registration? Try this instead
+        </div>
+        <div class="p-6 bg-white">
+          <div class="flex flex-col md:flex-row md:items-start gap-5">
+            <img src="./logos/sharepoint.png" alt="SharePoint" style=${{ width: '52px', height: '52px', objectFit: 'contain', flexShrink: 0 }} />
+            <div class="flex-1">
+              <h3 class="text-xl font-bold mb-1" style=${{ color: '#0f6cbd' }}>
+                Vanilla JS + SharePoint REST API: the locked-down-tenant workaround
+              </h3>
+              <p class="text-sm text-gray-700 mb-3">
+                When the client blocks PnP, blocks PowerShell, and won't grant an Azure app registration,
+                you can still inventory and report on <strong>SharePoint Online</strong> by pasting plain
+                JavaScript into the browser console. It runs in your already-authenticated session, uses
+                only your existing permissions, and needs <strong>no tooling, no install, and no admin consent</strong>.
+              </p>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2 py-1 text-xs rounded-full font-medium" style=${{ backgroundColor: '#ebf3fc', color: '#115ea3' }}>Site & subsite inventory</span>
+                <span class="px-2 py-1 text-xs rounded-full font-medium" style=${{ backgroundColor: '#ebf3fc', color: '#115ea3' }}>Lists & libraries + item counts</span>
+                <span class="px-2 py-1 text-xs rounded-full font-medium" style=${{ backgroundColor: '#ebf3fc', color: '#115ea3' }}>Columns & content types</span>
+                <span class="px-2 py-1 text-xs rounded-full font-medium" style=${{ backgroundColor: '#ebf3fc', color: '#115ea3' }}>Permission inheritance</span>
+                <span class="px-2 py-1 text-xs rounded-full font-medium" style=${{ backgroundColor: '#ebf3fc', color: '#115ea3' }}>CSV export</span>
+              </div>
+              <div class="p-3 rounded-md mb-4 text-xs text-gray-600 border" style=${{ backgroundColor: '#faf9f8', borderColor: '#e1dfdd' }}>
+                <strong>Scope check:</strong> this is a fast workaround for <strong>SharePoint Online reporting only</strong>.
+                It will not help with Power Apps, Power Automate flows, Power BI, or Teams. For those you still need the modules above.
+              </div>
+              <a href="https://spdenis.com/vanilla-js-and-sharepoint-rest-api/" target="_blank" rel="noopener noreferrer"
+                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold text-white transition-colors"
+                 style=${{ backgroundColor: '#0f6cbd' }}>
+                Read the guide: Vanilla JS &amp; the SharePoint REST API
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <footer class="mt-12 bg-gray-900 text-white rounded-t-xl">
