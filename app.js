@@ -836,22 +836,57 @@ Save-Module -Name MicrosoftTeams -Path C:\\PSModules`} />
         <p class="text-sm text-gray-700 mb-3">
           Run this if OneDrive folder redirection has hidden your installed modules from Windows PowerShell 5.1. It is safe to run repeatedly.
         </p>
-        <${CodeBlock} code=${`$docsPath = [Environment]::GetFolderPath('MyDocuments')
-$ps5Path = Join-Path $docsPath 'WindowsPowerShell\\Modules'
-$regKey = Get-Item 'HKCU:\\Environment'
+        <${CodeBlock} code=${`$ErrorActionPreference = 'Stop'
+$EnvKey = 'HKCU:\\Environment'
 
-$currentPath = $regKey.GetValue('PSModulePath', '', 'DoNotExpandEnvironmentNames')
-$pathArray = $currentPath -split ';' | Where-Object { $_ }
+$candidates = [System.Collections.Generic.List[string]]::new()
+foreach ($base in @(
+        [Environment]::GetFolderPath('MyDocuments'),
+        (Join-Path $env:USERPROFILE 'Documents'),
+        $env:OneDrive,
+        \${env:OneDriveCommercial},
+        \${env:OneDriveConsumer})) {
+    if ($base) {
+        $candidates.Add((Join-Path $base 'WindowsPowerShell\\Modules'))
+        $candidates.Add((Join-Path $base 'Documents\\WindowsPowerShell\\Modules'))
+    }
+}
+$roots = $candidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
 
-if ($ps5Path -notin $pathArray) {
-    $pathArray += $ps5Path
-    Set-ItemProperty -Path 'HKCU:\\Environment' -Name 'PSModulePath' -Value ($pathArray -join ';') -Type ExpandString
-    Write-Host "Successfully repaired Windows PowerShell 5.1 module path." -ForegroundColor Green
-} else {
-    Write-Host "Windows PowerShell 5.1 module path is already correct." -ForegroundColor Cyan
+$raw      = (Get-Item $EnvKey).GetValue('PSModulePath', '', 'DoNotExpandEnvironmentNames')
+$existing = @($raw -split ';' | Where-Object { $_ })
+$expanded = $existing | ForEach-Object { [Environment]::ExpandEnvironmentVariables($_) }
+
+$toAdd = @()
+foreach ($r in $roots) {
+    if (($expanded -notcontains $r) -and ($toAdd -notcontains $r)) { $toAdd += $r }
 }
 
-if ($ps5Path -notin ($env:PSModulePath -split ';')) { $env:PSModulePath += ";$ps5Path" }`} />
+if ($toAdd.Count -gt 0) {
+    Set-ItemProperty -Path $EnvKey -Name PSModulePath -Value (@($existing + $toAdd) -join ';') -Type ExpandString
+    Write-Host "Added to per-user PSModulePath:" -ForegroundColor Green
+    $toAdd | ForEach-Object { Write-Host "  + $_" -ForegroundColor White }
+} else {
+    Write-Host "PSModulePath already covers all per-user module locations." -ForegroundColor Cyan
+}
+
+foreach ($r in $roots) {
+    if (($env:PSModulePath -split ';') -notcontains $r) { $env:PSModulePath += ";$r" }
+}
+
+if (-not ([System.Management.Automation.PSTypeName]'Win32.NM').Type) {
+    Add-Type -Namespace Win32 -Name NM -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("user32.dll", SetLastError=true, CharSet=System.Runtime.InteropServices.CharSet.Auto)]
+public static extern System.IntPtr SendMessageTimeout(System.IntPtr hWnd, uint Msg, System.UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out System.UIntPtr lpdwResult);
+'@
+}
+$r = [UIntPtr]::Zero
+[void][Win32.NM]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$r)
+Write-Host "Done. Open a new PowerShell window." -ForegroundColor Green`} />
+        <div class="mt-3 p-3 rounded-md text-sm flex items-start gap-2" style=${{ backgroundColor: '#fff4ce', border: '1px solid #f2d98f', color: '#8a6d00' }}>
+          <span style=${{ flexShrink: 0 }}>↻</span>
+          <span><strong>Recommended:</strong> restart Windows after running this fix. A fresh PowerShell window usually picks up the change, but a reboot guarantees every app and service sees the updated <code class="bg-amber-100 px-1 rounded">PSModulePath</code>.</span>
+        </div>
       </div>
 
       <div class="mt-12 rounded-lg overflow-hidden glass-card shadow-lg border" style=${{ borderColor: '#c7e0f4' }}>
