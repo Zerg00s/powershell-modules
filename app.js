@@ -116,7 +116,7 @@ Import-Module ExchangeOnlineManagement`,
       ],
       specializations: ["Teams"],
       notes: "Excellent for Teams management. Retrieves Teams-enabled M365 groups with Get-Team and team members with Get-TeamUser.",
-      installCmd: `Install-Module -Name MicrosoftTeams -Force -AllowClobber -Scope CurrentUser`,
+      installCmd: `Install-Module -Name MicrosoftTeams -Scope CurrentUser`,
       authCmd: `Connect-MicrosoftTeams`,
       cmdletUrl: "https://learn.microsoft.com/en-us/powershell/module/teams/?view=teams-ps"
     },
@@ -228,7 +228,7 @@ Import-Module AzureAD -Scope CurrentUser`,
       specializations: ["Power Apps", "Flows"],
       notes: "Focused exclusively on Power Apps and Power Automate flow management. Only works in PowerShell 5.",
       installCmd: `Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -Scope CurrentUser
-Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Scope CurrentUser`,
+Install-Module -Name Microsoft.PowerApps.PowerShell CurrentUser`,
       authCmd: `Add-PowerAppsAccount`,
       cmdletUrl: "https://learn.microsoft.com/en-us/powershell/module/microsoft.powerapps.administration.powershell/?view=pa-ps-latest"
     },
